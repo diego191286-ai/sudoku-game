@@ -1,391 +1,163 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { generarSudoku, verificarTablero, estaCompleto, obtenerPista } from './sudoku'
+import { useState, useEffect } from 'react'
+import SudokuGame from './games/sudoku/SudokuGame.jsx'
+import WordSearch from './games/wordsearch/WordSearch.jsx'
+import Crossword from './games/crossword/Crossword.jsx'
 import './index.css'
 
-const STORAGE_KEY = 'sudoku_partida'
-
-function cargarPartida() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch { return null }
-}
-
-function guardarPartida(estado) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(estado)) } catch {}
-}
-
-function borrarPartida() {
-  try { localStorage.removeItem(STORAGE_KEY) } catch {}
-}
-
-function formatTiempo(seg) {
-  const m = Math.floor(seg / 60).toString().padStart(2, '0')
-  const s = (seg % 60).toString().padStart(2, '0')
-  return `${m}:${s}`
-}
-
-function SplashScreen({ onDone }) {
+// ─── Splash principal "Games By Diego" ───────────────────────────────────────
+function MainSplash({ onDone }) {
   useEffect(() => {
-    const t = setTimeout(onDone, 3200)
+    const t = setTimeout(onDone, 3000)
     return () => clearTimeout(t)
   }, [])
 
-  // Tablero 9x9 completo para el fondo animado
-  const tableroFondo = [
-    [5,3,0, 0,7,0, 0,0,0],
-    [6,0,0, 1,9,5, 0,0,0],
-    [0,9,8, 0,0,0, 0,6,0],
-    [8,0,0, 0,6,0, 0,0,3],
-    [4,0,0, 8,0,3, 0,0,1],
-    [7,0,0, 0,2,0, 0,0,6],
-    [0,6,0, 0,0,0, 2,8,0],
-    [0,0,0, 4,1,9, 0,0,5],
-    [0,0,0, 0,8,0, 0,7,9],
-  ]
+  const iconos = ['🧩','🔤','📝','🎮','🏆','⭐']
 
   return (
-    <div className="splash">
+    <div className="splash main-splash">
       {/* Partículas de fondo */}
-      {Array.from({ length: 12 }, (_, i) => (
+      {Array.from({ length: 14 }, (_, i) => (
         <div key={i} className="splash-particle" style={{
-          left: `${8 + i * 8}%`,
-          animationDelay: `${i * 0.18}s`,
-          animationDuration: `${2.5 + (i % 4) * 0.5}s`,
-          width: `${6 + (i % 3) * 6}px`,
-          height: `${6 + (i % 3) * 6}px`,
+          left: `${5 + i * 7}%`,
+          animationDelay: `${i * 0.15}s`,
+          animationDuration: `${2.8 + (i % 4) * 0.4}s`,
+          width: `${8 + (i % 3) * 6}px`,
+          height: `${8 + (i % 3) * 6}px`,
         }}/>
       ))}
 
-      {/* Tablero completo en el fondo (decorativo) */}
-      <div className="splash-board-bg">
-        {tableroFondo.flat().map((n, i) => (
-          <div key={i} className={`splash-bg-cell ${n !== 0 ? 'has-num' : ''}`}
-            style={{ animationDelay: `${i * 0.015}s` }}>
-            {n !== 0 ? n : ''}
-          </div>
-        ))}
-      </div>
-
-      {/* Contenido central */}
       <div className="splash-content">
-        {/* Ícono grande animado */}
-        <div className="splash-icon-wrap">
-          <div className="splash-icon-ring"/>
-          <div className="splash-icon-ring ring2"/>
-          <svg className="splash-icon-svg" width="80" height="80" viewBox="0 0 80 80" fill="none">
-            <rect width="80" height="80" rx="20" fill="url(#sg)"/>
-            <rect x="8"  y="8"  width="19" height="19" rx="4" fill="white" fillOpacity="0.95"/>
-            <rect x="31" y="8"  width="19" height="19" rx="4" fill="white" fillOpacity="0.4"/>
-            <rect x="53" y="8"  width="19" height="19" rx="4" fill="white" fillOpacity="0.95"/>
-            <rect x="8"  y="31" width="19" height="19" rx="4" fill="white" fillOpacity="0.4"/>
-            <rect x="31" y="31" width="19" height="19" rx="4" fill="white" fillOpacity="0.95"/>
-            <rect x="53" y="31" width="19" height="19" rx="4" fill="white" fillOpacity="0.4"/>
-            <rect x="8"  y="53" width="19" height="19" rx="4" fill="white" fillOpacity="0.95"/>
-            <rect x="31" y="53" width="19" height="19" rx="4" fill="white" fillOpacity="0.4"/>
-            <rect x="53" y="53" width="19" height="19" rx="4" fill="white" fillOpacity="0.95"/>
-            <defs>
-              <linearGradient id="sg" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#7c3aed"/>
-                <stop offset="1" stopColor="#ec4899"/>
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-
-        {/* Título con letras que caen una a una */}
-        <div className="splash-titulo-wrap">
-          {"SUDOKU".split('').map((l, i) => (
-            <span key={i} className="splash-letra" style={{ animationDelay: `${0.4 + i * 0.08}s` }}>{l}</span>
+        {/* Iconos de juegos orbitando */}
+        <div className="ms-orbit-wrap">
+          <div className="ms-orbit-ring"/>
+          <div className="ms-orbit-ring ms-ring2"/>
+          <div className="ms-center-icon">🎮</div>
+          {iconos.map((ic, i) => (
+            <div key={i} className="ms-orbit-icon" style={{
+              '--angle': `${i * 60}deg`,
+              animationDelay: `${i * 0.1}s`
+            }}>{ic}</div>
           ))}
         </div>
 
-        <div className="splash-subtitulo">Challenge your logic</div>
-
-        {/* Barra de carga con brillo */}
-        <div className="splash-loader">
-          <div className="splash-loader-bar"/>
-          <div className="splash-loader-shine"/>
+        {/* Título animado letra a letra */}
+        <div className="ms-titulo-wrap">
+          {'GAMES'.split('').map((l, i) => (
+            <span key={i} className="splash-letra ms-letra" style={{ animationDelay: `${0.5 + i * 0.09}s` }}>{l}</span>
+          ))}
+        </div>
+        <div className="ms-by">
+          {'BY DIEGO'.split('').map((l, i) => (
+            <span key={i} className="ms-by-letra" style={{ animationDelay: `${0.9 + i * 0.07}s` }}>{l === ' ' ? '\u00A0' : l}</span>
+          ))}
         </div>
 
-        <div className="splash-credito">Made by Diego</div>
+        <div className="splash-subtitulo" style={{ animationDelay: '1.6s' }}>Your game collection</div>
+
+        <div className="splash-loader" style={{ animationDelay: '1.7s' }}>
+          <div className="splash-loader-bar" style={{ animationDelay: '1.75s' }}/>
+          <div className="splash-loader-shine" style={{ animationDelay: '2.6s' }}/>
+        </div>
+
+        <div className="splash-credito" style={{ animationDelay: '1.9s' }}>Made by Diego</div>
       </div>
     </div>
   )
 }
 
+// ─── Home — selección de juegos ───────────────────────────────────────────────
+const JUEGOS = [
+  {
+    id: 'sudoku',
+    nombre: 'Sudoku',
+    descripcion: 'Llena la grilla 9×9 sin repetir números',
+    emoji: '🧩',
+    color: '#7c3aed',
+    color2: '#ec4899',
+    disponible: true,
+  },
+  {
+    id: 'wordsearch',
+    nombre: 'Sopa de Letras',
+    descripcion: 'Encuentra todas las palabras escondidas',
+    emoji: '🔤',
+    color: '#0ea5e9',
+    color2: '#6366f1',
+    disponible: true,
+  },
+  {
+    id: 'crossword',
+    nombre: 'Crucigrama',
+    descripcion: 'Resuelve las pistas y completa las palabras',
+    emoji: '📝',
+    color: '#f59e0b',
+    color2: '#ef4444',
+    disponible: true,
+  },
+]
+
+function Home({ onSelect, darkMode, toggleDarkMode }) {
+  return (
+    <div className="home">
+      <header className="header">
+        <div className="header-brand ms-header-brand">
+          <span className="ms-header-icon">🎮</span>
+          <div>
+            <div className="ms-header-title">Games</div>
+            <div className="ms-header-sub">by Diego</div>
+          </div>
+        </div>
+        <button className="btn-tema" onClick={toggleDarkMode}>{darkMode ? '☀️' : '🌙'}</button>
+      </header>
+
+      <div className="home-content">
+        <div className="home-saludo">Elige un juego</div>
+        <div className="home-cards">
+          {JUEGOS.map((j, i) => (
+            <button
+              key={j.id}
+              className={`game-card ${!j.disponible ? 'pronto' : ''}`}
+              style={{ '--c1': j.color, '--c2': j.color2, animationDelay: `${i * 0.12}s` }}
+              onClick={() => j.disponible && onSelect(j.id)}
+            >
+              <div className="game-card-glow"/>
+              <div className="game-card-emoji">{j.emoji}</div>
+              <div className="game-card-info">
+                <div className="game-card-nombre">{j.nombre}</div>
+                <div className="game-card-desc">{j.descripcion}</div>
+              </div>
+              <div className="game-card-arrow">→</div>
+              {!j.disponible && <div className="game-card-pronto">Próximamente</div>}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── App principal ─────────────────────────────────────────────────────────────
 export default function App() {
-  const [splash, setSplash] = useState(true)
-  const [puzzle, setPuzzle] = useState(null)
-  const [solucion, setSolucion] = useState(null)
-  const [fijas, setFijas] = useState(null)
-  const [actual, setActual] = useState(null)
-  const [seleccionada, setSeleccionada] = useState(null)
-  const [dificultad, setDificultad] = useState('medio')
-  const [errores, setErrores] = useState(null)
-  const [ganado, setGanado] = useState(false)
-  const [tiempo, setTiempo] = useState(0)
-  const [corriendo, setCorriendo] = useState(false)
-  const [pistasUsadas, setPistasUsadas] = useState(0)
+  const [mainSplash, setMainSplash] = useState(true)
+  const [juego, setJuego] = useState(null) // null = home
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('sudoku_tema') !== 'light')
-  const intervalRef = useRef(null)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-tema', darkMode ? 'dark' : 'light')
     localStorage.setItem('sudoku_tema', darkMode ? 'dark' : 'light')
   }, [darkMode])
 
-  useEffect(() => {
-    if (corriendo && !ganado) {
-      intervalRef.current = setInterval(() => setTiempo(t => t + 1), 1000)
-    } else {
-      clearInterval(intervalRef.current)
-    }
-    return () => clearInterval(intervalRef.current)
-  }, [corriendo, ganado])
+  if (mainSplash) return <MainSplash onDone={() => setMainSplash(false)} />
 
-  useEffect(() => {
-    if (!puzzle) return
-    guardarPartida({ puzzle, solucion, fijas, actual, dificultad, tiempo, pistasUsadas })
-  }, [actual, tiempo])
-
-  useEffect(() => {
-    const guardada = cargarPartida()
-    if (guardada) {
-      setPuzzle(guardada.puzzle)
-      setSolucion(guardada.solucion)
-      setFijas(guardada.fijas)
-      setActual(guardada.actual)
-      setDificultad(guardada.dificultad)
-      setTiempo(0)
-      setPistasUsadas(guardada.pistasUsadas || 0)
-      setCorriendo(false) // arranca cuando termina el splash
-    } else {
-      nuevaPartida('medio')
-    }
-  }, [])
-
-  const nuevaPartida = useCallback((dif) => {
-    const { puzzle: p, solucion: s } = generarSudoku(dif)
-    const f = p.map(fila => fila.map(v => v !== 0))
-    const a = p.map(fila => [...fila])
-    setPuzzle(p)
-    setSolucion(s)
-    setFijas(f)
-    setActual(a)
-    setDificultad(dif)
-    setSeleccionada(null)
-    setErrores(null)
-    setGanado(false)
-    setTiempo(0)
-    setPistasUsadas(0)
-    setCorriendo(!splash) // si ya pasó el splash, arranca; si no, espera
-    borrarPartida()
-  }, [])
-
-  const ingresarNumero = useCallback((num) => {
-    if (!seleccionada || ganado) return
-    const [r, c] = seleccionada
-    if (fijas[r][c]) return
-    const nuevo = actual.map(f => [...f])
-    nuevo[r][c] = num
-    setActual(nuevo)
-    // Validación en tiempo real
-    setErrores(verificarTablero(nuevo, solucion))
-    if (estaCompleto(nuevo, solucion)) {
-      setCorriendo(false)
-      setGanado(true)
-      borrarPartida()
-    }
-  }, [seleccionada, actual, fijas, solucion, ganado])
-
-  const verificar = useCallback(() => {
-    if (!actual) return
-    setErrores(verificarTablero(actual, solucion))
-  }, [actual, solucion])
-
-  const usarPista = useCallback(() => {
-    if (!actual || ganado) return
-    const pos = obtenerPista(actual, solucion, fijas)
-    if (!pos) return
-    const [r, c] = pos
-    const nuevo = actual.map(f => [...f])
-    nuevo[r][c] = solucion[r][c]
-    setActual(nuevo)
-    setSeleccionada([r, c])
-    setErrores(verificarTablero(nuevo, solucion))
-    setPistasUsadas(p => p + 1)
-    if (estaCompleto(nuevo, solucion)) {
-      setCorriendo(false)
-      setGanado(true)
-      borrarPartida()
-    }
-  }, [actual, solucion, fijas, ganado])
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.key >= '1' && e.key <= '9') ingresarNumero(parseInt(e.key))
-      if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') ingresarNumero(0)
-      if (e.key === 'ArrowUp' && seleccionada) setSeleccionada([Math.max(0, seleccionada[0] - 1), seleccionada[1]])
-      if (e.key === 'ArrowDown' && seleccionada) setSeleccionada([Math.min(8, seleccionada[0] + 1), seleccionada[1]])
-      if (e.key === 'ArrowLeft' && seleccionada) setSeleccionada([seleccionada[0], Math.max(0, seleccionada[1] - 1)])
-      if (e.key === 'ArrowRight' && seleccionada) setSeleccionada([seleccionada[0], Math.min(8, seleccionada[1] + 1)])
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [ingresarNumero, seleccionada])
-
-  if (splash) return <SplashScreen onDone={() => { setSplash(false); setCorriendo(true) }} />
-  if (!puzzle || !actual) return <div className="loading">Generando sudoku...</div>
-
-  const getCeldaClase = (r, c) => {
-    const clases = ['celda']
-    if (fijas[r][c]) clases.push('fija')
-    if (seleccionada) {
-      const [sr, sc] = seleccionada
-      if (r === sr && c === sc) clases.push('seleccionada')
-      else if (r === sr || c === sc) clases.push('resaltada')
-      else if (Math.floor(r / 3) === Math.floor(sr / 3) && Math.floor(c / 3) === Math.floor(sc / 3)) clases.push('resaltada')
-      if (actual[r][c] !== 0 && actual[r][c] === actual[sr][sc]) clases.push('mismo-numero')
-    }
-    if (errores) {
-      const e = errores[r][c]
-      if (e === 'incorrecto') clases.push('incorrecto')
-      else if (e === 'correcto' && !fijas[r][c]) clases.push('correcto')
-    }
-    return clases.join(' ')
-  }
+  if (juego === 'sudoku')     return <SudokuGame onBack={() => setJuego(null)} />
+  if (juego === 'wordsearch') return <WordSearch onBack={() => setJuego(null)} />
+  if (juego === 'crossword')  return <Crossword  onBack={() => setJuego(null)} />
 
   return (
-    <div className="app">
-      <header className="header">
-        <div className="header-brand">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="28" height="28" rx="7" fill="url(#grad)"/>
-            <rect x="3" y="3" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.9"/>
-            <rect x="11" y="3" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.35"/>
-            <rect x="19" y="3" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.9"/>
-            <rect x="3" y="11" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.35"/>
-            <rect x="11" y="11" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.9"/>
-            <rect x="19" y="11" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.35"/>
-            <rect x="3" y="19" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.9"/>
-            <rect x="11" y="19" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.35"/>
-            <rect x="19" y="19" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.9"/>
-            <defs>
-              <linearGradient id="grad" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#7c3aed"/>
-                <stop offset="1" stopColor="#ec4899"/>
-              </linearGradient>
-            </defs>
-          </svg>
-          <span>Sudoku</span>
-        </div>
-        <button className="btn-tema" onClick={() => setDarkMode(d => !d)} title="Cambiar tema">
-          {darkMode ? '☀️' : '🌙'}
-        </button>
-      </header>
-
-      <div className="controles-top">
-        <div className="dificultad-btns">
-          {['facil', 'medio', 'dificil'].map(d => (
-            <button key={d} className={`btn-dif ${dificultad === d ? 'activo' : ''}`} onClick={() => nuevaPartida(d)}>
-              {d === 'facil' ? 'Fácil' : d === 'medio' ? 'Medio' : 'Difícil'}
-            </button>
-          ))}
-        </div>
-        <div className="stats">
-          <span className="stat">⏱ {formatTiempo(tiempo)}</span>
-          <span className="stat">💡 {pistasUsadas}</span>
-        </div>
-      </div>
-
-      <div className="tablero-wrap">
-        <div className="tablero">
-          {actual.map((fila, r) =>
-            fila.map((val, c) => (
-              <div
-                key={`${r}-${c}`}
-                className={getCeldaClase(r, c)}
-                style={{
-                  borderRight: (c + 1) % 3 === 0 && c !== 8 ? '2px solid var(--border-box)' : '',
-                  borderBottom: (r + 1) % 3 === 0 && r !== 8 ? '2px solid var(--border-box)' : '',
-                }}
-                onClick={() => !fijas[r][c] && setSeleccionada([r, c])}
-                onFocus={() => !fijas[r][c] && setSeleccionada([r, c])}
-                tabIndex={fijas[r][c] ? -1 : 0}
-              >
-                {val !== 0 ? val : ''}
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      <div className="teclado">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-          <button key={n} className="btn-num" onClick={() => ingresarNumero(n)}>{n}</button>
-        ))}
-        <button className="btn-num borrar" onClick={() => ingresarNumero(0)}>✕</button>
-      </div>
-
-      <div className="acciones">
-        <button className="btn-accion pista" onClick={usarPista}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 16v-4M12 8h.01"/>
-          </svg>
-          Pista
-        </button>
-        <button className="btn-accion nuevo" onClick={() => nuevaPartida(dificultad)}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-            <path d="M3 3v5h5"/>
-          </svg>
-          Nuevo
-        </button>
-      </div>
-
-      {ganado && (
-        <div className="splash ganaste-splash">
-          <div className="splash-content">
-            <div className="splash-grid">
-              {Array.from({ length: 27 }, (_, i) => {
-                // Llena la mini-grilla con la solución (primeras 3 filas)
-                const r = Math.floor(i / 9)
-                const c = i % 9
-                const n = solucion[r][c]
-                return (
-                  <div key={i} className="splash-cell filled"
-                    style={{ animationDelay: `${i * 0.03}s` }}>
-                    {n}
-                  </div>
-                )
-              })}
-            </div>
-            <div className="splash-titulo">¡Ganaste!</div>
-            <div className="ganaste-stats">
-              <div className="ganaste-stat-item">
-                <span className="ganaste-stat-label">Tiempo</span>
-                <span className="ganaste-stat-valor">⏱ {formatTiempo(tiempo)}</span>
-              </div>
-              <div className="ganaste-stat-item">
-                <span className="ganaste-stat-label">Pistas</span>
-                <span className="ganaste-stat-valor">💡 {pistasUsadas}</span>
-              </div>
-              <div className="ganaste-stat-item">
-                <span className="ganaste-stat-label">Dificultad</span>
-                <span className="ganaste-stat-valor">
-                  {dificultad === 'facil' ? '🟢 Fácil' : dificultad === 'medio' ? '🟡 Medio' : '🔴 Difícil'}
-                </span>
-              </div>
-            </div>
-            <div className="ganaste-splash-btns">
-              <button className="btn-accion nuevo" onClick={() => nuevaPartida(dificultad)}>🔄 Jugar de nuevo</button>
-              <button className="btn-accion" onClick={() => setGanado(false)}>Ver tablero</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <Home
+      onSelect={setJuego}
+      darkMode={darkMode}
+      toggleDarkMode={() => setDarkMode(d => !d)}
+    />
   )
 }
