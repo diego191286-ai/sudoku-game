@@ -25,14 +25,43 @@ function formatTiempo(seg) {
   return `${m}:${s}`
 }
 
+function SplashScreen({ onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 2400)
+    return () => clearTimeout(t)
+  }, [])
+
+  const celdas = [1,7,4, 0,0,0, 3,0,0,
+                  0,0,0, 0,0,3, 0,8,5,
+                  0,0,0, 0,0,0, 0,0,0]
+  return (
+    <div className="splash">
+      <div className="splash-content">
+        <div className="splash-grid">
+          {celdas.map((n, i) => (
+            <div key={i} className={`splash-cell ${n !== 0 ? 'filled' : ''}`}
+              style={{ animationDelay: `${i * 0.04}s` }}>
+              {n !== 0 ? n : ''}
+            </div>
+          ))}
+        </div>
+        <div className="splash-titulo">Sudoku</div>
+        <div className="splash-subtitulo">Pon a prueba tu lógica</div>
+        <div className="splash-loader"><div className="splash-loader-bar"></div></div>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
+  const [splash, setSplash] = useState(true)
   const [puzzle, setPuzzle] = useState(null)
   const [solucion, setSolucion] = useState(null)
-  const [fijas, setFijas] = useState(null)        // celdas originales del puzzle
-  const [actual, setActual] = useState(null)       // estado actual del jugador
-  const [seleccionada, setSeleccionada] = useState(null) // [fila, col]
+  const [fijas, setFijas] = useState(null)
+  const [actual, setActual] = useState(null)
+  const [seleccionada, setSeleccionada] = useState(null)
   const [dificultad, setDificultad] = useState('medio')
-  const [errores, setErrores] = useState(null)     // null = sin verificar
+  const [errores, setErrores] = useState(null)
   const [ganado, setGanado] = useState(false)
   const [tiempo, setTiempo] = useState(0)
   const [corriendo, setCorriendo] = useState(false)
@@ -40,13 +69,11 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('sudoku_tema') !== 'light')
   const intervalRef = useRef(null)
 
-  // Aplicar tema
   useEffect(() => {
     document.documentElement.setAttribute('data-tema', darkMode ? 'dark' : 'light')
     localStorage.setItem('sudoku_tema', darkMode ? 'dark' : 'light')
   }, [darkMode])
 
-  // Temporizador
   useEffect(() => {
     if (corriendo && !ganado) {
       intervalRef.current = setInterval(() => setTiempo(t => t + 1), 1000)
@@ -56,13 +83,11 @@ export default function App() {
     return () => clearInterval(intervalRef.current)
   }, [corriendo, ganado])
 
-  // Guardar progreso automáticamente
   useEffect(() => {
     if (!puzzle) return
     guardarPartida({ puzzle, solucion, fijas, actual, dificultad, tiempo, pistasUsadas })
   }, [actual, tiempo])
 
-  // Cargar partida guardada o iniciar nueva
   useEffect(() => {
     const guardada = cargarPartida()
     if (guardada) {
@@ -104,7 +129,8 @@ export default function App() {
     const nuevo = actual.map(f => [...f])
     nuevo[r][c] = num
     setActual(nuevo)
-    setErrores(null)
+    // Validación en tiempo real
+    setErrores(verificarTablero(nuevo, solucion))
     if (estaCompleto(nuevo, solucion)) {
       setCorriendo(false)
       setGanado(true)
@@ -126,7 +152,7 @@ export default function App() {
     nuevo[r][c] = solucion[r][c]
     setActual(nuevo)
     setSeleccionada([r, c])
-    setErrores(null)
+    setErrores(verificarTablero(nuevo, solucion))
     setPistasUsadas(p => p + 1)
     if (estaCompleto(nuevo, solucion)) {
       setCorriendo(false)
@@ -135,7 +161,6 @@ export default function App() {
     }
   }, [actual, solucion, fijas, ganado])
 
-  // Teclado físico
   useEffect(() => {
     const handler = (e) => {
       if (e.key >= '1' && e.key <= '9') ingresarNumero(parseInt(e.key))
@@ -149,6 +174,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', handler)
   }, [ingresarNumero, seleccionada])
 
+  if (splash) return <SplashScreen onDone={() => setSplash(false)} />
   if (!puzzle || !actual) return <div className="loading">Generando sudoku...</div>
 
   const getCeldaClase = (r, c) => {
@@ -159,7 +185,6 @@ export default function App() {
       if (r === sr && c === sc) clases.push('seleccionada')
       else if (r === sr || c === sc) clases.push('resaltada')
       else if (Math.floor(r / 3) === Math.floor(sr / 3) && Math.floor(c / 3) === Math.floor(sc / 3)) clases.push('resaltada')
-      // Resaltar mismo número
       if (actual[r][c] !== 0 && actual[r][c] === actual[sr][sc]) clases.push('mismo-numero')
     }
     if (errores) {
@@ -172,23 +197,37 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* Header */}
       <header className="header">
-        <div className="header-brand">🧩 Sudoku</div>
+        <div className="header-brand">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="28" height="28" rx="7" fill="url(#grad)"/>
+            <rect x="3" y="3" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.9"/>
+            <rect x="11" y="3" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.35"/>
+            <rect x="19" y="3" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.9"/>
+            <rect x="3" y="11" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.35"/>
+            <rect x="11" y="11" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.9"/>
+            <rect x="19" y="11" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.35"/>
+            <rect x="3" y="19" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.9"/>
+            <rect x="11" y="19" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.35"/>
+            <rect x="19" y="19" width="7" height="7" rx="1.5" fill="white" fillOpacity="0.9"/>
+            <defs>
+              <linearGradient id="grad" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#7c3aed"/>
+                <stop offset="1" stopColor="#ec4899"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>Sudoku</span>
+        </div>
         <button className="btn-tema" onClick={() => setDarkMode(d => !d)} title="Cambiar tema">
           {darkMode ? '☀️' : '🌙'}
         </button>
       </header>
 
-      {/* Controles superiores */}
       <div className="controles-top">
         <div className="dificultad-btns">
           {['facil', 'medio', 'dificil'].map(d => (
-            <button
-              key={d}
-              className={`btn-dif ${dificultad === d ? 'activo' : ''}`}
-              onClick={() => nuevaPartida(d)}
-            >
+            <button key={d} className={`btn-dif ${dificultad === d ? 'activo' : ''}`} onClick={() => nuevaPartida(d)}>
               {d === 'facil' ? 'Fácil' : d === 'medio' ? 'Medio' : 'Difícil'}
             </button>
           ))}
@@ -199,7 +238,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* Tablero */}
       <div className="tablero-wrap">
         <div className="tablero">
           {actual.map((fila, r) =>
@@ -222,7 +260,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* Teclado numérico */}
       <div className="teclado">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
           <button key={n} className="btn-num" onClick={() => ingresarNumero(n)}>{n}</button>
@@ -230,14 +267,12 @@ export default function App() {
         <button className="btn-num borrar" onClick={() => ingresarNumero(0)}>✕</button>
       </div>
 
-      {/* Acciones */}
       <div className="acciones">
         <button className="btn-accion" onClick={verificar}>🔍 Verificar</button>
         <button className="btn-accion pista" onClick={usarPista}>💡 Pista</button>
         <button className="btn-accion nuevo" onClick={() => nuevaPartida(dificultad)}>🔄 Nuevo</button>
       </div>
 
-      {/* Modal ganaste */}
       {ganado && (
         <div className="overlay" onClick={() => setGanado(false)}>
           <div className="modal-ganaste" onClick={e => e.stopPropagation()}>

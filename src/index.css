@@ -72,6 +72,7 @@ body {
   position: sticky; top: 0; z-index: 10;
 }
 .header-brand {
+  display: flex; align-items: center; gap: 8px;
   font-size: 22px; font-weight: 800;
   background: linear-gradient(135deg, #a855f7, #ec4899);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
@@ -218,4 +219,64 @@ body {
 }
 @media (min-width: 600px) {
   .tablero { width: 420px; }
+}
+
+/* SPLASH */
+@keyframes splashFadeOut { from { opacity:1; } to { opacity:0; pointer-events:none; } }
+@keyframes splashCellPop { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
+@keyframes splashTitleIn { from { transform:translateY(16px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+@keyframes splashBarFill { from { width:0%; } to { width:100%; } }
+
+.splash {
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 30% 40%, rgba(168,85,247,0.15) 0%, transparent 60%),
+                    radial-gradient(ellipse at 70% 70%, rgba(236,72,153,0.1) 0%, transparent 50%);
+  display: flex; align-items: center; justify-content: center;
+  animation: splashFadeOut 0.35s ease 2.05s both;
+}
+.splash-content {
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.splash-grid {
+  display: grid; grid-template-columns: repeat(9, 1fr);
+  gap: 3px; width: min(270px, 72vw);
+}
+.splash-cell {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(9px, 2.5vw, 13px);
+  font-weight: 700;
+  color: var(--text-muted);
+  transform: scale(0); opacity: 0;
+  animation: splashCellPop 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+.splash-cell.filled {
+  background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(168,85,247,0.2));
+  color: var(--purple);
+  border-color: rgba(168,85,247,0.3);
+}
+.splash-titulo {
+  font-size: 36px; font-weight: 900; letter-spacing: -1px;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: splashTitleIn 0.4s ease 0.6s both;
+}
+.splash-subtitulo {
+  font-size: 14px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.5px;
+  animation: splashTitleIn 0.4s ease 0.75s both;
+}
+.splash-loader {
+  width: 140px; height: 3px;
+  background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden;
+  animation: splashTitleIn 0.3s ease 0.9s both;
+}
+.splash-loader-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #a855f7, #ec4899);
+  border-radius: 99px;
+  animation: splashBarFill 1.2s cubic-bezier(0.4,0,0.2,1) 0.95s both;
 }
