@@ -3,7 +3,81 @@ import { CRUCIGRAMAS, generarTablero } from './crossword'
 
 function formatTiempo(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}` }
 
+// Grilla de cuadros negros/blancos de fondo para el splash
+const PATRON_BG = [1,0,1,0,1,0,1,0,1,0,1, 0,1,0,1,0,1,0,1,0,1,0, 1,0,1,0,1,0,1,0,1,0,1,
+                   0,1,0,1,0,1,0,1,0,1,0, 1,0,1,0,1,0,1,0,1,0,1, 0,1,0,1,0,1,0,1,0,1,0,
+                   1,0,1,0,1,0,1,0,1,0,1, 0,1,0,1,0,1,0,1,0,1,0, 1,0,1,0,1,0,1,0,1,0,1,
+                   0,1,0,1,0,1,0,1,0,1,0, 1,0,1,0,1,0,1,0,1,0,1]
+
+function CrosswordSplash({ onDone }) {
+  useEffect(() => { const t = setTimeout(onDone, 3000); return () => clearTimeout(t) }, [])
+
+  return (
+    <div className="splash cw-splash">
+      {/* Partículas */}
+      {Array.from({ length: 12 }, (_, i) => (
+        <div key={i} className="splash-particle" style={{
+          left: `${6 + i * 8}%`,
+          animationDelay: `${i * 0.16}s`,
+          animationDuration: `${2.5 + (i % 3) * 0.5}s`,
+          width: `${6 + (i % 3) * 5}px`, height: `${6 + (i % 3) * 5}px`,
+          background: 'linear-gradient(135deg,#f59e0b,#ef4444)'
+        }}/>
+      ))}
+
+      {/* Grilla de crucigrama de fondo */}
+      <div className="cw-splash-bg">
+        {PATRON_BG.map((v, i) => (
+          <div key={i} className={`cw-splash-bg-cell ${v ? 'blanca' : 'negra'}`}
+            style={{ animationDelay: `${i * 0.01}s` }}/>
+        ))}
+      </div>
+
+      <div className="splash-content">
+        <div className="splash-icon-wrap">
+          <div className="splash-icon-ring cw-ring"/>
+          <div className="splash-icon-ring ring2 cw-ring"/>
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="splash-icon-svg cw-icon-svg">
+            <rect width="80" height="80" rx="20" fill="url(#cwsg)"/>
+            <rect x="8"  y="8"  width="28" height="28" rx="5" fill="white" fillOpacity="0.9"/>
+            <rect x="44" y="8"  width="28" height="28" rx="5" fill="white" fillOpacity="0.3"/>
+            <rect x="8"  y="44" width="28" height="28" rx="5" fill="white" fillOpacity="0.3"/>
+            <rect x="44" y="44" width="28" height="28" rx="5" fill="white" fillOpacity="0.9"/>
+            <text x="14" y="32" fontSize="18" fontWeight="900" fill="url(#cwsg)" fontFamily="monospace">1</text>
+            <text x="50" y="68" fontSize="18" fontWeight="900" fill="url(#cwsg)" fontFamily="monospace">2</text>
+            <defs>
+              <linearGradient id="cwsg" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#f59e0b"/><stop offset="1" stopColor="#ef4444"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <div className="cw-splash-titulo-wrap">
+          {'CRUCI'.split('').map((l, i) => (
+            <span key={i} className="cw-splash-letra" style={{ animationDelay: `${0.4 + i * 0.07}s` }}>{l}</span>
+          ))}
+        </div>
+        <div className="cw-splash-titulo-wrap" style={{ marginTop: '-8px' }}>
+          {'GRAMA'.split('').map((l, i) => (
+            <span key={i} className="cw-splash-letra" style={{ animationDelay: `${0.78 + i * 0.07}s` }}>{l}</span>
+          ))}
+        </div>
+
+        <div className="splash-subtitulo cw-subtitulo">Solve the clues, fill the grid</div>
+
+        <div className="splash-loader cw-loader">
+          <div className="splash-loader-bar cw-loader-bar"/>
+          <div className="splash-loader-shine"/>
+        </div>
+        <div className="splash-credito" style={{ animationDelay: '1.4s' }}>Made by Diego</div>
+      </div>
+    </div>
+  )
+}
+
 export default function Crossword({ onBack }) {
+  const [splash, setSplash] = useState(true)
   const cruci = CRUCIGRAMAS[0]
   const { grid: gridBase, numeradas } = generarTablero(cruci)
 
@@ -97,6 +171,8 @@ export default function Crossword({ onBack }) {
     const letra = respuestas[r]?.[c]
     return letra && gridBase[r]?.[c]?.letra === letra
   }
+
+  if (splash) return <CrosswordSplash onDone={() => setSplash(false)} />
 
   return (
     <div className="cw-app">

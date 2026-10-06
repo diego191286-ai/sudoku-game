@@ -450,14 +450,26 @@ body {
   filter: drop-shadow(0 0 6px rgba(168,85,247,0.5));
 }
 
+@keyframes msLetterDrop {
+  from { transform: translateY(-40px) scale(1.3); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
 .ms-titulo-wrap {
-  display: flex; gap: 3px;
+  display: flex; gap: 4px;
   filter: drop-shadow(0 0 24px rgba(168,85,247,0.6));
 }
 .ms-letra {
-  font-size: clamp(40px, 11vw, 60px) !important;
-  background: linear-gradient(135deg, #c084fc, #a855f7, #ec4899) !important;
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-size: clamp(44px, 12vw, 66px);
+  font-weight: 900;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0;
+  animation: msLetterDrop 0.5s cubic-bezier(0.34,1.4,0.64,1) forwards;
+  display: inline-block;
 }
 .ms-by {
   display: flex; gap: 1px; margin-top: -6px;
@@ -585,3 +597,81 @@ body {
   .ws-palabras { width:100%; flex-direction:row; flex-wrap:wrap; }
   .cw-pistas { width:100%; max-height:200px; }
 }
+
+/* ── SPLASH SOPA DE LETRAS ── */
+@keyframes wsLetterDrop {
+  from { transform: translateY(-35px) scale(1.3); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+.ws-splash {
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 20% 30%, rgba(14,165,233,0.25) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 70%, rgba(99,102,241,0.2) 0%, transparent 50%);
+  animation: splashFadeOut 0.4s ease 2.65s both;
+}
+.ws-splash-bg {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr);
+  gap: 2px; padding: 2px; opacity: 0.06; pointer-events: none;
+}
+.ws-splash-bg-cell {
+  border-radius: 3px; background: #0ea5e9;
+  transform: scale(0); opacity: 0;
+  animation: splashBgCell 0.25s cubic-bezier(0.34,1.4,0.64,1) forwards;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(8px,1.5vw,12px); font-weight: 800; color: white;
+}
+.ws-ring { border-color: rgba(14,165,233,0.6) !important; }
+.ws-icon-svg { filter: drop-shadow(0 0 24px rgba(14,165,233,0.7)) drop-shadow(0 0 48px rgba(99,102,241,0.4)); }
+.ws-splash-titulo-wrap { display: flex; gap: 2px; filter: drop-shadow(0 0 20px rgba(14,165,233,0.6)); }
+.ws-splash-letra {
+  font-size: clamp(38px, 11vw, 56px); font-weight: 900; letter-spacing: 2px;
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9, #6366f1);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  opacity: 0; display: inline-block;
+  animation: wsLetterDrop 0.45s cubic-bezier(0.34,1.4,0.64,1) forwards;
+}
+.ws-subtitulo { animation: splashTitleIn 0.4s ease 1.15s both; }
+.ws-loader { animation: splashTitleIn 0.4s ease 1.25s both; box-shadow: 0 0 12px rgba(14,165,233,0.3); }
+.ws-loader-bar { animation: splashBarFill 1.6s cubic-bezier(0.4,0,0.2,1) 1.3s both;
+  background: linear-gradient(90deg, #0ea5e9, #38bdf8, #6366f1, #38bdf8); }
+
+/* ── SPLASH CRUCIGRAMA ── */
+@keyframes cwLetterDrop {
+  from { transform: translateY(-35px) scale(1.3); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+.cw-splash {
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 25% 35%, rgba(245,158,11,0.25) 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 65%, rgba(239,68,68,0.2) 0%, transparent 50%);
+  animation: splashFadeOut 0.4s ease 2.65s both;
+}
+.cw-splash-bg {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr);
+  gap: 2px; padding: 2px; opacity: 0.08; pointer-events: none;
+}
+.cw-splash-bg-cell {
+  border-radius: 3px;
+  transform: scale(0); opacity: 0;
+  animation: splashBgCell 0.2s cubic-bezier(0.34,1.4,0.64,1) forwards;
+}
+.cw-splash-bg-cell.blanca { background: rgba(245,158,11,0.6); }
+.cw-splash-bg-cell.negra  { background: rgba(239,68,68,0.15); }
+.cw-ring { border-color: rgba(245,158,11,0.6) !important; }
+.cw-icon-svg { filter: drop-shadow(0 0 24px rgba(245,158,11,0.7)) drop-shadow(0 0 48px rgba(239,68,68,0.4)); }
+.cw-splash-titulo-wrap { display: flex; gap: 2px; filter: drop-shadow(0 0 20px rgba(245,158,11,0.6)); }
+.cw-splash-letra {
+  font-size: clamp(38px, 11vw, 56px); font-weight: 900; letter-spacing: 2px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b, #ef4444);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  opacity: 0; display: inline-block;
+  animation: cwLetterDrop 0.45s cubic-bezier(0.34,1.4,0.64,1) forwards;
+}
+.cw-subtitulo { animation: splashTitleIn 0.4s ease 1.15s both; }
+.cw-loader { animation: splashTitleIn 0.4s ease 1.25s both; box-shadow: 0 0 12px rgba(245,158,11,0.3); }
+.cw-loader-bar { animation: splashBarFill 1.6s cubic-bezier(0.4,0,0.2,1) 1.3s both;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24, #ef4444, #fbbf24); }

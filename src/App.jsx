@@ -43,7 +43,7 @@ function MainSplash({ onDone }) {
         {/* Título animado letra a letra */}
         <div className="ms-titulo-wrap">
           {'GAMES'.split('').map((l, i) => (
-            <span key={i} className="splash-letra ms-letra" style={{ animationDelay: `${0.5 + i * 0.09}s` }}>{l}</span>
+            <span key={i} className="ms-letra" style={{ animationDelay: `${0.5 + i * 0.09}s` }}>{l}</span>
           ))}
         </div>
         <div className="ms-by">
