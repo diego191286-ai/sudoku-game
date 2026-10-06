@@ -274,17 +274,41 @@ export default function App() {
       </div>
 
       {ganado && (
-        <div className="overlay" onClick={() => setGanado(false)}>
-          <div className="modal-ganaste" onClick={e => e.stopPropagation()}>
-            <div className="ganaste-icon">🎉</div>
-            <div className="ganaste-titulo">¡Felicidades!</div>
-            <div className="ganaste-info">
-              <span>⏱ Tiempo: <strong>{formatTiempo(tiempo)}</strong></span>
-              <span>💡 Pistas usadas: <strong>{pistasUsadas}</strong></span>
-              <span>📊 Dificultad: <strong>{dificultad === 'facil' ? 'Fácil' : dificultad === 'medio' ? 'Medio' : 'Difícil'}</strong></span>
+        <div className="splash ganaste-splash">
+          <div className="splash-content">
+            <div className="splash-grid">
+              {Array.from({ length: 27 }, (_, i) => {
+                // Llena la mini-grilla con la solución (primeras 3 filas)
+                const r = Math.floor(i / 9)
+                const c = i % 9
+                const n = solucion[r][c]
+                return (
+                  <div key={i} className="splash-cell filled"
+                    style={{ animationDelay: `${i * 0.03}s` }}>
+                    {n}
+                  </div>
+                )
+              })}
             </div>
-            <div className="ganaste-btns">
-              <button className="btn-accion nuevo" onClick={() => nuevaPartida(dificultad)}>Jugar de nuevo</button>
+            <div className="splash-titulo">¡Ganaste!</div>
+            <div className="ganaste-stats">
+              <div className="ganaste-stat-item">
+                <span className="ganaste-stat-label">Tiempo</span>
+                <span className="ganaste-stat-valor">⏱ {formatTiempo(tiempo)}</span>
+              </div>
+              <div className="ganaste-stat-item">
+                <span className="ganaste-stat-label">Pistas</span>
+                <span className="ganaste-stat-valor">💡 {pistasUsadas}</span>
+              </div>
+              <div className="ganaste-stat-item">
+                <span className="ganaste-stat-label">Dificultad</span>
+                <span className="ganaste-stat-valor">
+                  {dificultad === 'facil' ? '🟢 Fácil' : dificultad === 'medio' ? '🟡 Medio' : '🔴 Difícil'}
+                </span>
+              </div>
+            </div>
+            <div className="ganaste-splash-btns">
+              <button className="btn-accion nuevo" onClick={() => nuevaPartida(dificultad)}>🔄 Jugar de nuevo</button>
               <button className="btn-accion" onClick={() => setGanado(false)}>Ver tablero</button>
             </div>
           </div>

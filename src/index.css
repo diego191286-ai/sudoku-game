@@ -280,3 +280,50 @@ body {
   border-radius: 99px;
   animation: splashBarFill 1.2s cubic-bezier(0.4,0,0.2,1) 0.95s both;
 }
+
+/* GANASTE SPLASH */
+@keyframes confetti {
+  0%   { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(60px) rotate(720deg); opacity: 0; }
+}
+.ganaste-splash {
+  animation: none !important; /* no fade out automático */
+  z-index: 200;
+}
+.ganaste-splash .splash-titulo {
+  animation: splashTitleIn 0.5s ease 0.5s both;
+}
+.ganaste-splash .splash-cell {
+  background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(236,72,153,0.3));
+  color: white;
+  border-color: rgba(168,85,247,0.5);
+}
+.ganaste-stats {
+  display: flex;
+  gap: 12px;
+  animation: splashTitleIn 0.4s ease 0.7s both;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ganaste-stat-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  min-width: 80px;
+}
+.ganaste-stat-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text-muted);
+}
+.ganaste-stat-valor {
+  font-size: 16px; font-weight: 800; color: var(--text);
+}
+.ganaste-splash-btns {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  animation: splashTitleIn 0.4s ease 0.85s both;
+}
+.ganaste-splash-btns .btn-accion {
+  padding: 13px 20px; font-size: 14px; min-width: 140px;
+}
