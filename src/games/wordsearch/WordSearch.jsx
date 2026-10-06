@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { generarSopa } from './wordsearch'
+import { generarSopa, CATEGORIAS_SOPA } from './wordsearch'
 
 const STORAGE_KEY = 'wordsearch_partida'
 function cargar() { try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null } catch { return null } }
@@ -7,6 +7,7 @@ function guardar(e) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(e))
 function borrar() { try { localStorage.removeItem(STORAGE_KEY) } catch {} }
 function formatTiempo(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}` }
 
+// ─── Splash ───────────────────────────────────────────────────────────────────
 function WordSearchSplash({ onDone }) {
   useEffect(() => { const t = setTimeout(onDone, 3000); return () => clearTimeout(t) }, [])
   const bgLetras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -59,8 +60,48 @@ function WordSearchSplash({ onDone }) {
   )
 }
 
+// ─── Selección de categoría ────────────────────────────────────────────────────
+function SeleccionCategoria({ onSelect, onBack, darkMode, toggleDarkMode }) {
+  return (
+    <div className="cat-screen">
+      <header className="header">
+        <button className="btn-back" onClick={onBack}>← Volver</button>
+        <div className="header-brand ws-brand">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <rect width="26" height="26" rx="7" fill="url(#wgh)"/>
+            <text x="4" y="19" fontSize="15" fontWeight="900" fill="white" fontFamily="monospace">Az</text>
+            <defs><linearGradient id="wgh" x1="0" y1="0" x2="26" y2="26"><stop stopColor="#0ea5e9"/><stop offset="1" stopColor="#6366f1"/></linearGradient></defs>
+          </svg>
+          <span>Sopa de Letras</span>
+        </div>
+        <button className="btn-tema" onClick={toggleDarkMode}>{darkMode ? '☀️' : '🌙'}</button>
+      </header>
+      <div className="cat-content">
+        <div className="cat-titulo">Elige una categoría</div>
+        <div className="cat-grid">
+          {CATEGORIAS_SOPA.map((cat, i) => (
+            <button
+              key={cat.id}
+              className="cat-card"
+              style={{ '--c1': cat.color, '--c2': cat.color2, animationDelay: `${i * 0.08}s` }}
+              onClick={() => onSelect(cat)}
+            >
+              <div className="cat-card-glow"/>
+              <div className="cat-card-emoji">{cat.emoji}</div>
+              <div className="cat-card-nombre">{cat.nombre}</div>
+              <div className="cat-card-count">{cat.palabras.length} palabras</div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Juego ────────────────────────────────────────────────────────────────────
 export default function WordSearch({ onBack }) {
   const [splash, setSplash] = useState(true)
+  const [categoria, setCategoria] = useState(null) // null = pantalla de selección
   const [grid, setGrid] = useState(null)
   const [palabras, setPalabras] = useState([])
   const [encontradas, setEncontradas] = useState([])
@@ -83,30 +124,18 @@ export default function WordSearch({ onBack }) {
     }
   }, [corriendo, ganado])
 
-  // Cargar o generar al montar
-  useEffect(() => {
-    const guardada = cargar()
-    if (guardada && guardada.grid) {
-      setGrid(guardada.grid)
-      setPalabras(guardada.palabras)
-      setEncontradas(guardada.encontradas || [])
-      setTiempo(0)
-    } else {
-      const { grid: g, palabras: p } = generarSopa(14)
-      setGrid(g)
-      setPalabras(p)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!grid) return
-    guardar({ grid, palabras, encontradas, tiempo })
-  }, [encontradas, tiempo])
-
-  const nuevaPartida = useCallback(() => {
-    const { grid: g, palabras: p } = generarSopa(14)
+  // Iniciar nueva partida con una categoría dada
+  const iniciarPartida = useCallback((cat) => {
+    const { grid: g, palabras: p } = generarSopa(14, cat.palabras)
     setGrid(g); setPalabras(p); setEncontradas([])
     setTiempo(0); setGanado(false); setCorriendo(true); borrar()
+  }, [])
+
+  // Cambiar de categoría: volver a la selección
+  const cambiarCategoria = useCallback(() => {
+    setCategoria(null); setGrid(null); setPalabras([])
+    setEncontradas([]); setTiempo(0); setGanado(false)
+    setCorriendo(false); borrar()
   }, [])
 
   const celdasEntre = useCallback((a, b) => {
@@ -150,20 +179,27 @@ export default function WordSearch({ onBack }) {
     setInicio(null); setSeleccion([])
   }, [seleccion, encontradas])
 
-  if (splash) return <WordSearchSplash onDone={() => { setSplash(false); setCorriendo(true) }} />
+  // ── Pantallas ──
+  if (splash) return <WordSearchSplash onDone={() => setSplash(false)} />
+
+  if (!categoria) return (
+    <SeleccionCategoria
+      onBack={onBack}
+      darkMode={darkMode}
+      toggleDarkMode={() => setDarkMode(d => !d)}
+      onSelect={(cat) => { setCategoria(cat); iniciarPartida(cat) }}
+    />
+  )
+
   if (!grid) return <div className="loading">Generando sopa de letras...</div>
 
   return (
     <div className="ws-app">
       <header className="header">
-        <button className="btn-back" onClick={onBack}>← Volver</button>
-        <div className="header-brand ws-brand">
-          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-            <rect width="26" height="26" rx="7" fill="url(#wg)"/>
-            <text x="4" y="19" fontSize="15" fontWeight="900" fill="white" fontFamily="monospace">Az</text>
-            <defs><linearGradient id="wg" x1="0" y1="0" x2="26" y2="26"><stop stopColor="#0ea5e9"/><stop offset="1" stopColor="#6366f1"/></linearGradient></defs>
-          </svg>
-          <span>Sopa de Letras</span>
+        <button className="btn-back" onClick={cambiarCategoria}>← Categorías</button>
+        <div className="header-brand ws-brand" style={{ '--c1': categoria.color }}>
+          <span style={{ fontSize: '20px' }}>{categoria.emoji}</span>
+          <span>{categoria.nombre}</span>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <span className="stat">⏱ {formatTiempo(tiempo)}</span>
@@ -202,11 +238,14 @@ export default function WordSearch({ onBack }) {
               {p.palabra}
             </div>
           ))}
-          <button className="btn-accion nuevo" style={{ marginTop: '12px' }} onClick={nuevaPartida}>
+          <button className="btn-accion nuevo" style={{ marginTop: '8px' }} onClick={() => iniciarPartida(categoria)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
             </svg>
             Nueva
+          </button>
+          <button className="btn-accion" style={{ marginTop: '6px' }} onClick={cambiarCategoria}>
+            🗂 Categorías
           </button>
         </div>
       </div>
@@ -235,8 +274,8 @@ export default function WordSearch({ onBack }) {
               <div className="ganaste-stat-item"><span className="ganaste-stat-label">Palabras</span><span className="ganaste-stat-valor">✓ {palabras.length}</span></div>
             </div>
             <div className="ganaste-splash-btns">
-              <button className="btn-accion nuevo" onClick={nuevaPartida}>Jugar de nuevo</button>
-              <button className="btn-accion" onClick={() => setGanado(false)}>Ver tablero</button>
+              <button className="btn-accion nuevo" onClick={() => iniciarPartida(categoria)}>Jugar de nuevo</button>
+              <button className="btn-accion" onClick={cambiarCategoria}>🗂 Categorías</button>
             </div>
           </div>
         </div>

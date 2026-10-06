@@ -680,3 +680,62 @@ body {
 .cw-loader { animation: splashTitleIn 0.4s ease 1.25s both; box-shadow: 0 0 12px rgba(245,158,11,0.3); }
 .cw-loader-bar { animation: splashBarFill 1.6s cubic-bezier(0.4,0,0.2,1) 1.3s both;
   background: linear-gradient(90deg, #f59e0b, #fbbf24, #ef4444, #fbbf24); }
+
+/* ─── Pantalla de selección de categoría ─────────────────────────────────── */
+.cat-screen {
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+  background: var(--bg);
+}
+.cat-content {
+  flex: 1;
+  padding: 24px 16px 32px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 20px;
+}
+.cat-titulo {
+  font-size: clamp(18px, 5vw, 26px);
+  font-weight: 800;
+  color: var(--text);
+  text-align: center;
+  opacity: 0;
+  animation: splashTitleIn 0.4s ease 0.1s both;
+}
+.cat-grid {
+  width: 100%;
+  max-width: 560px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+@media (min-width: 500px) { .cat-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.cat-card {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px;
+  padding: 22px 12px 18px;
+  border-radius: 18px;
+  border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  opacity: 0;
+  animation: gameCardIn 0.45s cubic-bezier(0.34,1.4,0.64,1) both;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.cat-card:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 8px 32px rgba(0,0,0,0.28); }
+.cat-card:active { transform: scale(0.97); }
+.cat-card-glow {
+  position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22), transparent 70%);
+  pointer-events: none;
+}
+.cat-card-emoji { font-size: 38px; line-height: 1; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25)); }
+.cat-card-nombre {
+  font-size: clamp(13px, 3.5vw, 16px); font-weight: 800;
+  color: #fff; text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.cat-card-count {
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.8); text-align: center;
+}
