@@ -27,27 +27,87 @@ function formatTiempo(seg) {
 
 function SplashScreen({ onDone }) {
   useEffect(() => {
-    const t = setTimeout(onDone, 2400)
+    const t = setTimeout(onDone, 3200)
     return () => clearTimeout(t)
   }, [])
 
-  const celdas = [1,7,4, 0,0,0, 3,0,0,
-                  0,0,0, 0,0,3, 0,8,5,
-                  0,0,0, 0,0,0, 0,0,0]
+  // Tablero 9x9 completo para el fondo animado
+  const tableroFondo = [
+    [5,3,0, 0,7,0, 0,0,0],
+    [6,0,0, 1,9,5, 0,0,0],
+    [0,9,8, 0,0,0, 0,6,0],
+    [8,0,0, 0,6,0, 0,0,3],
+    [4,0,0, 8,0,3, 0,0,1],
+    [7,0,0, 0,2,0, 0,0,6],
+    [0,6,0, 0,0,0, 2,8,0],
+    [0,0,0, 4,1,9, 0,0,5],
+    [0,0,0, 0,8,0, 0,7,9],
+  ]
+
   return (
     <div className="splash">
+      {/* Partículas de fondo */}
+      {Array.from({ length: 12 }, (_, i) => (
+        <div key={i} className="splash-particle" style={{
+          left: `${8 + i * 8}%`,
+          animationDelay: `${i * 0.18}s`,
+          animationDuration: `${2.5 + (i % 4) * 0.5}s`,
+          width: `${6 + (i % 3) * 6}px`,
+          height: `${6 + (i % 3) * 6}px`,
+        }}/>
+      ))}
+
+      {/* Tablero completo en el fondo (decorativo) */}
+      <div className="splash-board-bg">
+        {tableroFondo.flat().map((n, i) => (
+          <div key={i} className={`splash-bg-cell ${n !== 0 ? 'has-num' : ''}`}
+            style={{ animationDelay: `${i * 0.015}s` }}>
+            {n !== 0 ? n : ''}
+          </div>
+        ))}
+      </div>
+
+      {/* Contenido central */}
       <div className="splash-content">
-        <div className="splash-grid">
-          {celdas.map((n, i) => (
-            <div key={i} className={`splash-cell ${n !== 0 ? 'filled' : ''}`}
-              style={{ animationDelay: `${i * 0.04}s` }}>
-              {n !== 0 ? n : ''}
-            </div>
+        {/* Ícono grande animado */}
+        <div className="splash-icon-wrap">
+          <div className="splash-icon-ring"/>
+          <div className="splash-icon-ring ring2"/>
+          <svg className="splash-icon-svg" width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" rx="20" fill="url(#sg)"/>
+            <rect x="8"  y="8"  width="19" height="19" rx="4" fill="white" fillOpacity="0.95"/>
+            <rect x="31" y="8"  width="19" height="19" rx="4" fill="white" fillOpacity="0.4"/>
+            <rect x="53" y="8"  width="19" height="19" rx="4" fill="white" fillOpacity="0.95"/>
+            <rect x="8"  y="31" width="19" height="19" rx="4" fill="white" fillOpacity="0.4"/>
+            <rect x="31" y="31" width="19" height="19" rx="4" fill="white" fillOpacity="0.95"/>
+            <rect x="53" y="31" width="19" height="19" rx="4" fill="white" fillOpacity="0.4"/>
+            <rect x="8"  y="53" width="19" height="19" rx="4" fill="white" fillOpacity="0.95"/>
+            <rect x="31" y="53" width="19" height="19" rx="4" fill="white" fillOpacity="0.4"/>
+            <rect x="53" y="53" width="19" height="19" rx="4" fill="white" fillOpacity="0.95"/>
+            <defs>
+              <linearGradient id="sg" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#7c3aed"/>
+                <stop offset="1" stopColor="#ec4899"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        {/* Título con letras que caen una a una */}
+        <div className="splash-titulo-wrap">
+          {"SUDOKU".split('').map((l, i) => (
+            <span key={i} className="splash-letra" style={{ animationDelay: `${0.4 + i * 0.08}s` }}>{l}</span>
           ))}
         </div>
-        <div className="splash-titulo">Sudoku</div>
-        <div className="splash-subtitulo">Pon a prueba tu lógica</div>
-        <div className="splash-loader"><div className="splash-loader-bar"></div></div>
+
+        <div className="splash-subtitulo">Challenge your logic</div>
+
+        {/* Barra de carga con brillo */}
+        <div className="splash-loader">
+          <div className="splash-loader-bar"/>
+          <div className="splash-loader-shine"/>
+        </div>
+
         <div className="splash-credito">Made by Diego</div>
       </div>
     </div>
