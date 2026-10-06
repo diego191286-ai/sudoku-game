@@ -157,7 +157,7 @@ export default function App() {
       setFijas(guardada.fijas)
       setActual(guardada.actual)
       setDificultad(guardada.dificultad)
-      setTiempo(guardada.tiempo || 0)
+      setTiempo(0)
       setPistasUsadas(guardada.pistasUsadas || 0)
       setCorriendo(true)
     } else {
