@@ -159,7 +159,7 @@ export default function App() {
       setDificultad(guardada.dificultad)
       setTiempo(0)
       setPistasUsadas(guardada.pistasUsadas || 0)
-      setCorriendo(true)
+      setCorriendo(false) // arranca cuando termina el splash
     } else {
       nuevaPartida('medio')
     }
@@ -179,7 +179,7 @@ export default function App() {
     setGanado(false)
     setTiempo(0)
     setPistasUsadas(0)
-    setCorriendo(true)
+    setCorriendo(!splash) // si ya pasó el splash, arranca; si no, espera
     borrarPartida()
   }, [])
 
@@ -235,7 +235,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', handler)
   }, [ingresarNumero, seleccionada])
 
-  if (splash) return <SplashScreen onDone={() => setSplash(false)} />
+  if (splash) return <SplashScreen onDone={() => { setSplash(false); setCorriendo(true) }} />
   if (!puzzle || !actual) return <div className="loading">Generando sudoku...</div>
 
   const getCeldaClase = (r, c) => {
