@@ -48,6 +48,7 @@ function SplashScreen({ onDone }) {
         <div className="splash-titulo">Sudoku</div>
         <div className="splash-subtitulo">Pon a prueba tu lógica</div>
         <div className="splash-loader"><div className="splash-loader-bar"></div></div>
+        <div className="splash-credito">Made by Diego</div>
       </div>
     </div>
   )
