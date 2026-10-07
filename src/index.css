@@ -720,7 +720,7 @@ body {
   background: linear-gradient(135deg, var(--c1), var(--c2));
   box-shadow: 0 4px 20px rgba(0,0,0,0.18);
   opacity: 0;
-  animation: gameCardIn 0.45s cubic-bezier(0.34,1.4,0.64,1) both;
+  animation: cardIn 0.5s cubic-bezier(0.34,1.2,0.64,1) forwards;
   transition: transform 0.18s, box-shadow 0.18s;
 }
 .cat-card:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 8px 32px rgba(0,0,0,0.28); }
