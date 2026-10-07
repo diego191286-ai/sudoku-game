@@ -118,6 +118,7 @@ export default function Crossword({ onBack }) {
   const [tiempo, setTiempo] = useState(0)
   const [ganado, setGanado] = useState(false)
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('sudoku_tema') !== 'light')
+  const [tabPistas, setTabPistas] = useState('H') // 'H' | 'V'
 
   useEffect(() => {
     document.documentElement.setAttribute('data-tema', darkMode ? 'dark' : 'light')
@@ -270,41 +271,69 @@ export default function Crossword({ onBack }) {
         </div>
 
         <div className="cw-pistas">
-          {palabraActiva && (
-            <div className="cw-pista-activa">
-              <span className="cw-pista-num">{palabraActiva.numero}{palabraActiva.dir === 'H' ? '→' : '↓'}</span>
-              <span>{palabraActiva.pista}</span>
+          {/* Tabs — solo visibles en móvil via CSS */}
+          <div className="cw-pistas-tabs">
+            <button className={`cw-tab-btn ${tabPistas === 'H' ? 'activo' : ''}`} onClick={() => setTabPistas('H')}>
+              → Horizontales ({cruci.palabras.filter(p => p.dir === 'H').length})
+            </button>
+            <button className={`cw-tab-btn ${tabPistas === 'V' ? 'activo' : ''}`} onClick={() => setTabPistas('V')}>
+              ↓ Verticales ({cruci.palabras.filter(p => p.dir === 'V').length})
+            </button>
+          </div>
+
+          <div className="cw-pistas-panel">
+            {palabraActiva && (
+              <div className="cw-pista-activa">
+                <span className="cw-pista-num">{palabraActiva.numero}{palabraActiva.dir === 'H' ? '→' : '↓'}</span>
+                <span>{palabraActiva.pista}</span>
+              </div>
+            )}
+
+            {/* Desktop: ambos grupos siempre visibles */}
+            <div className="cw-pistas-grupo cw-grupo-desktop">
+              <div className="cw-pistas-titulo">→ Horizontales</div>
+              {cruci.palabras.filter(p => p.dir === 'H').map(p => (
+                <div key={`h-${p.numero}`}
+                  className={`cw-pista-item ${palabraActiva?.numero === p.numero && dir === 'H' ? 'activa' : ''}`}
+                  onClick={() => { setSeleccionada([p.fila, p.col]); setDir('H') }}>
+                  <strong>{p.numero}.</strong> {p.pista}
+                </div>
+              ))}
             </div>
-          )}
-          <div className="cw-pistas-grupo">
-            <div className="cw-pistas-titulo">→ Horizontales</div>
-            {cruci.palabras.filter(p => p.dir === 'H').map(p => (
-              <div key={`h-${p.numero}`}
-                className={`cw-pista-item ${palabraActiva?.numero === p.numero && dir === 'H' ? 'activa' : ''}`}
-                onClick={() => { setSeleccionada([p.fila, p.col]); setDir('H') }}>
-                <strong>{p.numero}.</strong> {p.pista}
-              </div>
-            ))}
+            <div className="cw-pistas-grupo cw-grupo-desktop">
+              <div className="cw-pistas-titulo">↓ Verticales</div>
+              {cruci.palabras.filter(p => p.dir === 'V').map(p => (
+                <div key={`v-${p.numero}`}
+                  className={`cw-pista-item ${palabraActiva?.numero === p.numero && dir === 'V' ? 'activa' : ''}`}
+                  onClick={() => { setSeleccionada([p.fila, p.col]); setDir('V') }}>
+                  <strong>{p.numero}.</strong> {p.pista}
+                </div>
+              ))}
+            </div>
+
+            {/* Mobile: solo el tab activo */}
+            <div className="cw-grupo-mobile">
+              {cruci.palabras.filter(p => p.dir === tabPistas).map(p => (
+                <div key={`${tabPistas}-${p.numero}`}
+                  className={`cw-pista-item ${palabraActiva?.numero === p.numero && dir === tabPistas ? 'activa' : ''}`}
+                  onClick={() => { setSeleccionada([p.fila, p.col]); setDir(tabPistas) }}>
+                  <strong>{p.numero}.</strong> {p.pista}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: '6px', marginTop: '10px', flexWrap: 'wrap' }}>
+              <button className="btn-accion nuevo" onClick={nuevaPartida}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+                </svg>
+                Nuevo
+              </button>
+              <button className="btn-accion" onClick={cambiarCategoria}>
+                🗂 Categorías
+              </button>
+            </div>
           </div>
-          <div className="cw-pistas-grupo">
-            <div className="cw-pistas-titulo">↓ Verticales</div>
-            {cruci.palabras.filter(p => p.dir === 'V').map(p => (
-              <div key={`v-${p.numero}`}
-                className={`cw-pista-item ${palabraActiva?.numero === p.numero && dir === 'V' ? 'activa' : ''}`}
-                onClick={() => { setSeleccionada([p.fila, p.col]); setDir('V') }}>
-                <strong>{p.numero}.</strong> {p.pista}
-              </div>
-            ))}
-          </div>
-          <button className="btn-accion nuevo" style={{ marginTop: '12px' }} onClick={nuevaPartida}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
-            </svg>
-            Nuevo
-          </button>
-          <button className="btn-accion" style={{ marginTop: '6px' }} onClick={cambiarCategoria}>
-            🗂 Categorías
-          </button>
         </div>
       </div>
 

@@ -232,21 +232,30 @@ export default function WordSearch({ onBack }) {
         </div>
 
         <div className="ws-palabras">
-          <div className="ws-palabras-titulo">Encuentra estas palabras</div>
-          {palabras.map(p => (
-            <div key={p.palabra} className={`ws-palabra ${encontradas.find(e => e.palabra === p.palabra) ? 'encontrada' : ''}`}>
-              {p.palabra}
-            </div>
-          ))}
-          <button className="btn-accion nuevo" style={{ marginTop: '8px' }} onClick={() => iniciarPartida(categoria)}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
-            </svg>
-            Nueva
-          </button>
-          <button className="btn-accion" style={{ marginTop: '6px' }} onClick={cambiarCategoria}>
-            🗂 Categorías
-          </button>
+          <div className="ws-palabras-titulo">
+            Palabras — {encontradas.length}/{palabras.length}
+          </div>
+          <div className="ws-progreso-bar">
+            <div className="ws-progreso-fill" style={{ width: `${palabras.length ? (encontradas.length / palabras.length) * 100 : 0}%` }}/>
+          </div>
+          <div className="ws-chips-wrap">
+            {palabras.map(p => (
+              <div key={p.palabra} className={`ws-palabra ${encontradas.find(e => e.palabra === p.palabra) ? 'encontrada' : ''}`}>
+                {p.palabra}
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '6px', marginTop: '10px', flexWrap: 'wrap' }}>
+            <button className="btn-accion nuevo" onClick={() => iniciarPartida(categoria)}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+              </svg>
+              Nueva
+            </button>
+            <button className="btn-accion" onClick={cambiarCategoria}>
+              🗂 Categorías
+            </button>
+          </div>
         </div>
       </div>
 
